@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <script src="../dist/scheme-designer.min.js?25"></script>
+</head>
+<body>
+<div style="margin: 20px auto; max-width: 1000px;">
+    <h2>Hall scheme example</h2>
+
+    <div>
+        <canvas id="canvas1" width="1000" height="800" style="border: 1px solid #ccc;">
+            Ваш браузер не поддерживает элемент canvas.
+        </canvas>
+    </div>
+</div>
+<script>
+    var defaultLayer = new SchemeDesigner.Layer('default', {zIndex: 10});
+
+    var placesCount = 40000;
+    var placesInRow = 500;
+    var placeMargin = 15;
+
+    var placeWidth = 13;
+    var placeHeight = 13;
+
+    /**
+     * Render place function
+     * @param {SchemeObject} schemeObject
+     * @param {Scheme} schemeDesigner
+     * @param {View} view
+     */
+    var renderPlace = function (schemeObject, schemeDesigner, view) {
+        var context = view.getContext();
+        var objectParams = schemeObject.getParams();
+
+        context.beginPath();
+        context.lineWidth = 1;
+        context.strokeStyle = '#B143B0';
+
+        context.fillStyle = '#B143B0';
+        if (objectParams.isSelected && schemeObject.isHovered) {
+            context.fillStyle = '#B143B0';
+        } else if (schemeObject.isHovered) {
+            context.fillStyle = 'white';
+        } else if (objectParams.isSelected) {
+            context.fillStyle = '#B143B0';
+        }
+
+        var relativeX = schemeObject.getX();
+        var relativeY = schemeObject.getY();
+
+        var width = schemeObject.getWidth();
+        var height = schemeObject.getHeight();
+        if (!schemeObject.isHovered && !objectParams.isSelected) {
+            relativeX = relativeX + 2;
+            relativeY = relativeY + 2;
+            width = width - 4;
+            height = height - 4;
+        }
+
+        context.rect(relativeX, relativeY, width, height);
+
+        context.fill();
+        context.stroke();
+
+        context.font = '6px Arial';
+
+        if (objectParams.isSelected && schemeObject.isHovered) {
+            context.fillStyle = 'white';
+        } else if (schemeObject.isHovered) {
+            context.fillStyle = '#B143B0';
+        } else if (objectParams.isSelected) {
+            context.fillStyle = 'white';
+        }
+
+        if (objectParams.isSelected || schemeObject.isHovered) {
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(objectParams.placeNumber, relativeX + (schemeObject.getWidth() / 2), relativeY + (schemeObject.getHeight() / 2));
+        }
+
+    };
+
+    var clickOnPlace = function (schemeObject, schemeDesigner, e)
+    {
+        var objectParams = schemeObject.getParams();
+        objectParams.isSelected = !objectParams.isSelected;
+    };
+
+    /**
+     * Creating places
+     */
+    for (var i = 0; i < placesCount; i++)
+    {
+        var leftOffset = (i % placesInRow) * (placeMargin + placeWidth);
+        var topOffset = Math.floor(i / placesInRow) * (placeMargin + placeHeight);
+
+        var place = new SchemeDesigner.SchemeObject({
+            /**
+             * Required params
+             */
+            x: 0.5 + leftOffset,
+            y: 0.5 + topOffset,
+            width: placeWidth,
+            height: placeHeight,
+            renderFunction: renderPlace,
+
+            /**
+             * Custom params (any names and count)
+             */
+            id: 'place_' + i,
+            price: 100,
+            placeNumber: i % 100,
+            sectorName: 'Sector ' + (i % placesInRow),
+
+            isSelected: false,
+            clickFunction: clickOnPlace,
+            clearFunction: function (schemeObject, schemeDesigner, view) {
+                var context = view.getContext();
+                var x = schemeObject.x;
+                var y = schemeObject.y;
+                var borderWidth = 5;
+                context.clearRect(x - borderWidth,
+                        y - borderWidth,
+                        this.width + (borderWidth * 2),
+                        this.height + (borderWidth * 2)
+                );
+            }
+        });
+
+        defaultLayer.addObject(place);
+    }
+
+
+    var canvas = document.getElementById('canvas1');
+    var schemeDesigner = new SchemeDesigner.Scheme(canvas, {
+        options: {
+            background: '#ffffff'
+        },
+        scroll: {
+            maxHiddenPart: 0.85
+        },
+        zoom: {
+            padding: 0.1,
+            maxScale: 8,
+            zoomCoefficient: 1.04
+        },
+        storage: {
+            treeDepth: 6
+        }
+    });
+
+    schemeDesigner.addLayer(defaultLayer);
+
+
+    /**
+     * Show scheme
+     */
+    schemeDesigner.render();
+
+
+
+    canvas.addEventListener('schemeDesigner.beforeRenderAll', function (e) {
+        console.time('renderAll');
+    }, false);
+
+    canvas.addEventListener('schemeDesigner.afterRenderAll', function (e) {
+        console.timeEnd('renderAll');
+    }, false);
+
+    canvas.addEventListener('schemeDesigner.clickOnObject', function (e) {
+        console.log('clickOnObject', e.detail);
+    }, false);
+
+    canvas.addEventListener('schemeDesigner.mouseOverObject', function (e) {
+        console.log('mouseOverObject', e.detail);
+    }, false);
+
+    canvas.addEventListener('schemeDesigner.mouseLeaveObject', function (e) {
+        console.log('mouseLeaveObject', e.detail);
+    }, false);
+</script>
+</body>
+</html>

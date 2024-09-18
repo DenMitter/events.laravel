@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "noImplicitAny": true,
+    "target": "es5"
+  }
+}
