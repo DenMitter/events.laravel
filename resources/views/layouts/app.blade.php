@@ -18,11 +18,11 @@
 
     <script src="{{ asset('dist/scheme-designer-master/dist/scheme-designer.min.js') }}"></script>
     <style>
-      #canvas {
-          width: 100%;
-          background-color: rgba(0, 0, 0, 0.137);
-          border-radius: 21px;
-      }
+        #canvas {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.137);
+            border-radius: 21px;
+        }
     </style>
 </head>
 <body>
